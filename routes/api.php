@@ -21,4 +21,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::apiResource('/todos', 'TodoController');
 Route::patch('/markCompleted', 'TodoController@markCompleted');
 Route::delete('/destroyCompleted/{request}', 'TodoController@destroyCompleted');
-
+Route::post('/login','AuthController@login');
+Route::post('/register','AuthController@register');
+Route::middleware('auth:api')->post('/logout','AuthController@logout');

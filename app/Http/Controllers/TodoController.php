@@ -14,7 +14,7 @@ class TodoController extends Controller
      */
     public function index()
     {
-        return Todo::all();
+        return Todo::where('user_id',auth()->user()->id)->get();
     }
 
     /**
@@ -38,7 +38,11 @@ class TodoController extends Controller
         $data = $request->validate([
            'title' => 'required|string'
         ]);
-        $todo = Todo::create($data);
+        $todo = Todo::create([
+            'user_id' => auth()->user()->id,
+            'title' => $request->title,
+            'completed' => $request->completed,
+        ]);
         return response($todo, 201);
     }
 
@@ -86,7 +90,8 @@ class TodoController extends Controller
         $data = $request->validate([
             'completed' => 'required|boolean'
         ]);
-        Todo::query()->update($data);
+//        Todo::query()->update($data);
+        Todo::where('user_id', auth()->user()->id)->update($data);
         return response('updated', 200);
 
     }
@@ -109,7 +114,17 @@ class TodoController extends Controller
 //        $request->validate([
 //            'todos' => 'required|array'
 //        ]);
+        $user_todos = auth()->user()->todos->map(function ($todo){
+            return $todo->id;
+        });
         $todos = explode(',',$request);
+        $user_todos_array = json_decode(json_encode($user_todos), true);
+
+        $check = array_diff($todos, $user_todos_array);
+
+        if(!empty($check)){
+            return response()->json('unauthorized to delete', 401);
+        }
         Todo::destroy($todos);
          return response($todos, 200);
 

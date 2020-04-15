@@ -14,13 +14,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('auth:api')->group(function(){
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    Route::apiResource('/todos', 'TodoController');
+    Route::post('/logout','AuthController@logout');
+    Route::patch('/markCompleted', 'TodoController@markCompleted');
+    Route::delete('/destroyCompleted/{request}', 'TodoController@destroyCompleted');
 });
 
-Route::apiResource('/todos', 'TodoController');
-Route::patch('/markCompleted', 'TodoController@markCompleted');
-Route::delete('/destroyCompleted/{request}', 'TodoController@destroyCompleted');
 Route::post('/login','AuthController@login');
 Route::post('/register','AuthController@register');
-Route::middleware('auth:api')->post('/logout','AuthController@logout');

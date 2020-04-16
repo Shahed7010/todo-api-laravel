@@ -6,24 +6,32 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
+use mysql_xdevapi\Exception;
 
 class AuthController extends Controller
 {
     public function login(Request $request){
-        $http = new \GuzzleHttp\Client();
+        try{
+            $http = new \GuzzleHttp\Client();
 
-        $response = $http->post(\config('services.passport.login_endpoint'), [
-            'form_params' => [
-                'grant_type' => 'password',
-                'client_id' => \config('services.passport.client_id'),
-                'client_secret' =>  \config('services.passport.client_secret'),
-                'username' => $request->username,
-                'password' => $request->password,
-                'scope' => '',
-            ],
-        ]);
+            $response = $http->post(\config('services.passport.login_endpoint'), [
+                'form_params' => [
+                    'grant_type' => 'password',
+                    'client_id' => \config('services.passport.client_id'),
+                    'client_secret' =>  \config('services.passport.client_secret'),
+                    'username' => $request->username,
+                    'password' => $request->password,
+                    'scope' => '',
+                ],
+            ]);
 
-        return json_decode((string) $response->getBody(), true);
+            return json_decode((string) $response->getBody(), true);
+        }catch (\Guzzlehttp\Exception\BadResponseException $e){
+
+            return response()->json('invalid username or password', $e->getCode());
+
+   }
+
 
     }
 
